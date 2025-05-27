@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Pelanggaran Siswa - SMK [Nama Sekolahmu]</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/dist/html5-qrcode.min.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Sistem Pencatat Pelanggaran Siswa</h1>
+        <nav>
+            <button onclick="showSection('siswa')">Untuk Siswa</button>
+            <button onclick="showSection('guru')">Untuk Guru</button>
+        </nav>
+    </header>
+
+    <main>
+        <section id="siswa-section" class="active">
+            <h2>Buat QR Code Datamu</h2>
+            <div class="card">
+                <p>Masukkan datamu untuk membuat QR Code yang akan digunakan saat mencatat pelanggaran.</p>
+                <div class="form-group">
+                    <label for="namaSiswa">Nama Lengkap:</label>
+                    <input type="text" id="namaSiswa" placeholder="Contoh: Alfiyan Cahya" required>
+                </div>
+                <div class="form-group">
+                    <label for="kelasSiswa">Kelas:</label>
+                    <input type="text" id="kelasSiswa" placeholder="Contoh: XII IPA 1" required>
+                </div>
+                <div class="form-group">
+                    <label for="jurusanSiswa">Jurusan (Opsional):</label>
+                    <input type="text" id="jurusanSiswa" placeholder="Contoh: Rekayasa Perangkat Lunak">
+                </div>
+                <button onclick="generateQRCode()">Buat QR Code</button>
+                <div id="qrcode" class="qrcode-container"></div>
+                <p class="small-text">Silakan **screenshot** atau **cetak** QR Code ini.</p>
+            </div>
+        </section>
+
+        <section id="guru-section" style="display:none;">
+            <h2>Input Pelanggaran Siswa</h2>
+            <div class="card">
+                <h3>1. Scan QR Code Siswa</h3>
+                <div id="qr-reader" style="width: 100%;"></div>
+                <div id="qr-reader-results" class="scan-result"></div>
+
+                <div id="pelanggaran-form" style="display:none;">
+                    <h3>2. Data Siswa:</h3>
+                    <p>Nama: <strong id="scannedNama"></strong></p>
+                    <p>Kelas: <strong id="scannedKelas"></strong></p>
+                    <p>Jurusan: <strong id="scannedJurusan"></strong></p>
+
+                    <h3>3. Pilih Jenis Pelanggaran:</h3>
+                    <div class="pelanggaran-options">
+                        <label><input type="checkbox" name="pelanggaran" value="Kerudung"> Kerudung (KR)</label>
+                        <label><input type="checkbox" name="pelanggaran" value="Kuku"> Kuku (K)</label>
+                        <label><input type="checkbox" name="pelanggaran" value="Kaos Kaki"> Kaos Kaki (KK)</label>
+                        <label><input type="checkbox" name="pelanggaran" value="Seragam"> Seragam (SR)</label>
+                        <label><input type="checkbox" name="pelanggaran" value="Sepatu"> Sepatu (S)</label>
+                        <label><input type="checkbox" name="pelanggaran" value="Dasi"> Dasi (A)</label>
+                        <label><input type="checkbox" name="pelanggaran" value="Topi"> Topi (A)</label>
+                        <label><input type="checkbox" name="pelanggaran" value="Sabuk"> Sabuk (A)</label>
+                    </div>
+                    <button onclick="recordPelanggaran()">Catat Pelanggaran</button>
+                </div>
+            </div>
+
+            <div class="card mt-20">
+                <h2>Daftar Pelanggaran Tercatat</h2>
+                <button onclick="exportToSpreadsheet()" class="export-btn">Ubah ke Spreadsheet (CSV)</button>
+                <table id="pelanggaran-list">
+                    <thead>
+                        <tr>
+                            <th>Nama</th>
+                            <th>Kelas</th>
+                            <th>Jurusan</th>
+                            <th>Pelanggaran</th>
+                            <th>Waktu</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        </tbody>
+                </table>
+                <p id="no-data-message" style="text-align: center; color: #555;">Belum ada data pelanggaran.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        ---<br>
+        Created by: Alfiyan<br>
+        ---
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

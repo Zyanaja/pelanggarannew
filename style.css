@@ -1,0 +1,247 @@
+/* General Styling */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f2f5; /* Light grey background */
+    color: #333;
+    line-height: 1.6;
+}
+
+header {
+    background-color: #2c3e50; /* Dark blue/grey */
+    color: #ffffff;
+    padding: 20px 0;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+header h1 {
+    margin: 0 0 10px 0;
+    font-size: 2.2em;
+}
+
+nav {
+    margin-top: 10px;
+}
+
+nav button {
+    background-color: #3498db; /* Blue */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    margin: 0 5px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+}
+
+nav button:hover {
+    background-color: #2980b9; /* Darker blue on hover */
+}
+
+main {
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 20px;
+}
+
+section {
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    margin-bottom: 30px;
+}
+
+h2 {
+    color: #2c3e50;
+    text-align: center;
+    margin-bottom: 25px;
+    font-size: 1.8em;
+}
+
+.card {
+    background-color: #fcfcfc;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 25px;
+    margin-bottom: 20px;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
+}
+
+.form-group input[type="text"] {
+    width: calc(100% - 22px); /* Adjust for padding and border */
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1em;
+}
+
+button {
+    background-color: #28a745; /* Green */
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1.1em;
+    transition: background-color 0.3s ease;
+    display: block;
+    width: 100%;
+    box-sizing: border-box; /* Include padding in width */
+    margin-top: 20px;
+}
+
+button:hover {
+    background-color: #218838; /* Darker green */
+}
+
+.qrcode-container {
+    margin-top: 25px;
+    text-align: center;
+    padding: 15px;
+    background-color: #ecf0f1; /* Light grey */
+    border-radius: 8px;
+}
+
+.qrcode-container img {
+    max-width: 100%;
+    height: auto;
+    border: 5px solid white; /* Border around QR */
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.small-text {
+    font-size: 0.9em;
+    color: #666;
+    text-align: center;
+    margin-top: 10px;
+}
+
+/* Guru Section Specific Styles */
+#qr-reader {
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+    min-height: 200px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden; /* Ensure video fits */
+    background-color: #f9f9f9;
+    margin-bottom: 20px;
+}
+
+.scan-result {
+    background-color: #e8f5e9; /* Light green for success */
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 15px;
+    border: 1px solid #c8e6c9;
+    color: #2e7d32; /* Dark green text */
+    font-weight: bold;
+    text-align: center;
+}
+
+.pelanggaran-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* Responsive grid */
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.pelanggaran-options label {
+    background-color: #f5f5f5;
+    border: 1px solid #ddd;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.pelanggaran-options label:hover {
+    background-color: #eaeaea;
+}
+
+.pelanggaran-options input[type="checkbox"] {
+    margin-right: 8px;
+    transform: scale(1.2); /* Slightly larger checkbox */
+}
+
+/* Table Styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    overflow: hidden; /* For rounded corners */
+}
+
+table th, table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+table th {
+    background-color: #456c86; /* Header background */
+    color: white;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+table tbody tr:nth-child(even) {
+    background-color: #f9f9f9; /* Zebra striping */
+}
+
+table tbody tr:hover {
+    background-color: #f1f1f1; /* Hover effect */
+}
+
+.export-btn {
+    background-color: #ffc107; /* Orange/Yellow for export */
+    color: #333;
+    width: auto; /* Override 100% width */
+    margin: 15px auto;
+    display: block;
+    padding: 10px 20px;
+}
+
+.export-btn:hover {
+    background-color: #e0a800; /* Darker orange */
+}
+
+#no-data-message {
+    padding: 20px;
+    border: 1px dashed #ccc;
+    border-radius: 5px;
+    margin-top: 20px;
+}
+
+/* Utilities */
+.mt-20 {
+    margin-top: 20px;
+}
+
+footer {
+    text-align: center;
+    padding: 20px;
+    margin-top: 40px;
+    color: #777;
+    font-size: 0.9em;
+    background-color: #eee;
+    border-top: 1px solid #ddd;
+}

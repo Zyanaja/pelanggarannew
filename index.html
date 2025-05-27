@@ -12,8 +12,8 @@
     <header>
         <h1>Sistem Pencatat Pelanggaran Siswa</h1>
         <nav>
-            <button onclick="showSection('siswa')">Untuk Siswa</button>
-            <button onclick="showSection('guru')">Untuk Guru</button>
+            <button id="btn-siswa" class="active" onclick="showSection('siswa')">Untuk Siswa</button>
+            <button id="btn-guru" onclick="showSection('guru')">Untuk Guru</button>
         </nav>
     </header>
 
@@ -34,7 +34,7 @@
                     <label for="jurusanSiswa">Jurusan (Opsional):</label>
                     <input type="text" id="jurusanSiswa" placeholder="Contoh: Rekayasa Perangkat Lunak">
                 </div>
-                <button onclick="generateQRCode()">Buat QR Code</button>
+                <button class="primary-btn" onclick="generateQRCode()">Buat QR Code</button>
                 <div id="qrcode" class="qrcode-container"></div>
                 <p class="small-text">Silakan **screenshot** atau **cetak** QR Code ini.</p>
             </div>
@@ -44,7 +44,7 @@
             <h2>Input Pelanggaran Siswa</h2>
             <div class="card">
                 <h3>1. Scan QR Code Siswa</h3>
-                <div id="qr-reader" style="width: 100%;"></div>
+                <div id="qr-reader" class="qr-reader-placeholder"></div>
                 <div id="qr-reader-results" class="scan-result"></div>
 
                 <div id="pelanggaran-form" style="display:none;">
@@ -64,27 +64,29 @@
                         <label><input type="checkbox" name="pelanggaran" value="Topi"> Topi (A)</label>
                         <label><input type="checkbox" name="pelanggaran" value="Sabuk"> Sabuk (A)</label>
                     </div>
-                    <button onclick="recordPelanggaran()">Catat Pelanggaran</button>
+                    <button class="success-btn" onclick="recordPelanggaran()">Catat Pelanggaran</button>
                 </div>
             </div>
 
             <div class="card mt-20">
                 <h2>Daftar Pelanggaran Tercatat</h2>
-                <button onclick="exportToSpreadsheet()" class="export-btn">Ubah ke Spreadsheet (CSV)</button>
-                <table id="pelanggaran-list">
-                    <thead>
-                        <tr>
-                            <th>Nama</th>
-                            <th>Kelas</th>
-                            <th>Jurusan</th>
-                            <th>Pelanggaran</th>
-                            <th>Waktu</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        </tbody>
-                </table>
-                <p id="no-data-message" style="text-align: center; color: #555;">Belum ada data pelanggaran.</p>
+                <button class="warning-btn export-btn" onclick="exportToSpreadsheet()">Ubah ke Spreadsheet (CSV)</button>
+                <div class="table-responsive">
+                    <table id="pelanggaran-list">
+                        <thead>
+                            <tr>
+                                <th>Nama</th>
+                                <th>Kelas</th>
+                                <th>Jurusan</th>
+                                <th>Pelanggaran</th>
+                                <th>Waktu</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            </tbody>
+                    </table>
+                </div>
+                <p id="no-data-message" class="no-data-msg" style="text-align: center; color: #555;">Belum ada data pelanggaran.</p>
             </div>
         </section>
     </main>

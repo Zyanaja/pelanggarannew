@@ -1,32 +1,31 @@
 let html5QrCode;
-let currentScannedStudent = null; // Untuk menyimpan data siswa yang sedang discan
-let isQrScannerRunning = false; // Status untuk melacak scanner
+let currentScannedStudent = null;
+let isQrScannerRunning = false;
+
+// Dapatkan referensi tombol
+const startScanBtn = document.getElementById('startScanBtn');
+const stopScanBtn = document.getElementById('stopScanBtn');
+const qrReaderResults = document.getElementById('qr-reader-results');
+const qrReaderDiv = document.getElementById('qr-reader');
+const pelanggaranForm = document.getElementById('pelanggaran-form');
 
 // --- FUNGSI NAVIGASI ---
 function showSection(sectionId) {
-    // Sembunyikan semua section
-    document.getElementById('siswa-section').style.display = 'none';
-    document.getElementById('guru-section').style.display = 'none';
+    document.querySelectorAll('.content-section').forEach(section => {
+        section.style.display = 'none';
+    });
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
 
-    // Nonaktifkan semua tombol navigasi
-    document.getElementById('btn-siswa').classList.remove('active');
-    document.getElementById('btn-guru').classList.remove('active');
-
-    // Tampilkan section yang dipilih
     document.getElementById(sectionId + '-section').style.display = 'block';
-
-    // Aktifkan tombol navigasi yang dipilih
     document.getElementById('btn-' + sectionId).classList.add('active');
 
-    // Kelola scanner QR saat beralih section
     if (sectionId === 'guru') {
-        if (!isQrScannerRunning) {
-            startQrScanner();
-        }
-    } else { // Jika beralih ke siswa section
-        if (isQrScannerRunning) {
-            stopQrScanner();
-        }
+        // Jangan langsung start scanner, biarkan user klik tombol
+        resetGuruSectionState(); // Reset tampilan guru setiap kali masuk
+    } else {
+        stopQrScanner(); // Pastikan scanner mati jika pindah ke bagian siswa
     }
 }
 
@@ -44,13 +43,13 @@ function generateQRCode() {
     const dataSiswa = {
         nama: nama,
         kelas: kelas,
-        jurusan: jurusan || '-' // Jika jurusan kosong, isi dengan '-'
+        jurusan: jurusan || '-'
     };
 
     const dataString = JSON.stringify(dataSiswa);
 
     const qrcodeContainer = document.getElementById('qrcode');
-    qrcodeContainer.innerHTML = ''; // Bersihkan QR sebelumnya
+    qrcodeContainer.innerHTML = '';
 
     new QRCode(qrcodeContainer, {
         text: dataString,
@@ -65,16 +64,37 @@ function generateQRCode() {
 }
 
 // --- FUNGSI UNTUK BAGIAN GURU (QR CODE SCANNER & PELANGGARAN) ---
-function startQrScanner() {
-    const qrCodeRegionId = "qr-reader";
-    if (html5QrCode) { // Pastikan scanner sebelumnya sudah berhenti
-        html5QrCode.stop().catch(err => console.warn("Error stopping old scanner:", err));
-    }
-    html5QrCode = new Html5Qrcode(qrCodeRegionId);
-    isQrScannerRunning = true; // Set status running
 
-    document.getElementById('qr-reader-results').innerText = 'Mencari kamera...';
-    document.getElementById('qr-reader').style.display = 'block'; // Pastikan container terlihat
+// Inisialisasi html5QrCode di luar fungsi start/stop
+// Ini membantu agar instansi Html5Qrcode bisa digunakan ulang
+html5QrCode = new Html5Qrcode("qr-reader");
+
+startScanBtn.addEventListener('click', () => {
+    startQrScanner();
+});
+
+stopScanBtn.addEventListener('click', () => {
+    stopQrScanner();
+});
+
+function startQrScanner() {
+    if (isQrScannerRunning) {
+        qrReaderResults.innerText = 'Kamera sudah berjalan.';
+        return;
+    }
+
+    qrReaderResults.innerText = 'Mencari kamera dan meminta izin...';
+    pelanggaranForm.style.display = 'none'; // Sembunyikan form pelanggaran saat scan dimulai
+
+    // Sembunyikan placeholder text
+    const placeholderText = qrReaderDiv.querySelector('.qr-placeholder-text');
+    if (placeholderText) {
+        placeholderText.style.display = 'none';
+    }
+    
+    // Pastikan tombol display-nya benar
+    startScanBtn.style.display = 'none';
+    stopScanBtn.style.display = 'block';
 
     Html5Qrcode.getCameras().then(devices => {
         if (devices && devices.length) {
@@ -83,10 +103,7 @@ function startQrScanner() {
             
             html5QrCode.start(
                 cameraId,
-                {
-                    fps: 10,
-                    qrbox: { width: 250, height: 250 }
-                },
+                { fps: 10, qrbox: { width: 250, height: 250 } },
                 (decodedText, decodedResult) => {
                     // Berhasil scan!
                     console.log(`Code matched = ${decodedText}`, decodedResult);
@@ -95,53 +112,106 @@ function startQrScanner() {
                         document.getElementById('scannedNama').innerText = studentData.nama;
                         document.getElementById('scannedKelas').innerText = studentData.kelas;
                         document.getElementById('scannedJurusan').innerText = studentData.jurusan;
-                        document.getElementById('qr-reader-results').innerText = `QR Code berhasil dipindai! Siswa: ${studentData.nama}`;
-                        document.getElementById('pelanggaran-form').style.display = 'block';
+                        qrReaderResults.innerText = `QR Code berhasil dipindai! Siswa: ${studentData.nama}`;
+                        pelanggaranForm.style.display = 'block';
                         currentScannedStudent = studentData; // Simpan data siswa
 
-                        // Stop scanner setelah berhasil scan
-                        stopQrScanner();
+                        // Hentikan scanner setelah berhasil scan agar tidak terus berjalan
+                        stopQrScanner(); 
                     } catch (e) {
-                        document.getElementById('qr-reader-results').innerText = 'Data QR tidak valid!';
+                        qrReaderResults.innerText = 'Data QR tidak valid!';
                         console.error('Error parsing QR data:', e);
                     }
                 },
                 (errorMessage) => {
-                    // Error atau belum ada QR, abaikan pesan warning ini di console
+                    // Pesan ini normal saat kamera mencari QR code
                     // console.warn(`QR Code no match = ${errorMessage}`);
                 }
-            ).catch((err) => {
-                console.error(`Unable to start scanning, please grant camera access.`, err);
-                document.getElementById('qr-reader-results').innerText = 'Gagal memulai kamera. Pastikan memberikan izin akses kamera dan tidak ada aplikasi lain yang menggunakan kamera.';
+            ).then(() => {
+                isQrScannerRunning = true;
+                qrReaderResults.innerText = 'Kamera aktif. Silakan arahkan QR Code.';
+                // Perlu sedikit delay untuk memastikan video element sudah ada sebelum diakses
+                setTimeout(() => {
+                    const videoElement = qrReaderDiv.querySelector('video');
+                    if (videoElement) {
+                        videoElement.style.display = 'block';
+                    }
+                }, 100);
+            }).catch((err) => {
+                console.error(`Gagal memulai kamera:`, err);
+                qrReaderResults.innerText = 'Gagal memulai kamera. Pastikan memberikan izin akses kamera dan tidak ada aplikasi lain yang menggunakan kamera. Error: ' + err.message;
                 isQrScannerRunning = false;
+                startScanBtn.style.display = 'block'; // Tampilkan lagi tombol start
+                stopScanBtn.style.display = 'none';
+                if (placeholderText) placeholderText.style.display = 'block'; // Tampilkan placeholder
             });
         } else {
-            alert('Tidak ada kamera yang ditemukan di perangkat Anda.');
-            document.getElementById('qr-reader-results').innerText = 'Tidak ada kamera yang ditemukan.';
+            qrReaderResults.innerText = 'Tidak ada kamera yang ditemukan di perangkat Anda.';
+            alert('Tidak ada kamera yang ditemukan.');
             isQrScannerRunning = false;
+            startScanBtn.style.display = 'block';
+            stopScanBtn.style.display = 'none';
+            if (placeholderText) placeholderText.style.display = 'block';
         }
     }).catch(err => {
-        console.error('Error getting cameras:', err);
-        document.getElementById('qr-reader-results').innerText = 'Gagal mengakses kamera. Periksa izin browser.';
+        console.error('Error mendapatkan daftar kamera:', err);
+        qrReaderResults.innerText = 'Gagal mengakses daftar kamera. Periksa izin browser.';
         isQrScannerRunning = false;
+        startScanBtn.style.display = 'block';
+        stopScanBtn.style.display = 'none';
+        if (placeholderText) placeholderText.style.display = 'block';
     });
 }
 
 function stopQrScanner() {
-    if (html5QrCode && isQrScannerRunning) {
+    if (html5QrCode.is  Scanning) { // Pastikan scanner memang sedang berjalan
         html5QrCode.stop().then(() => {
             console.log("QR Code scanning stopped.");
             isQrScannerRunning = false;
-            // Opsional: sembunyikan area scanner atau tampilkan placeholder
-            // document.getElementById('qr-reader').style.display = 'none';
+            qrReaderResults.innerText = 'Scan kamera dihentikan.';
+            pelanggaranForm.style.display = 'none'; // Sembunyikan form pelanggaran
+            startScanBtn.style.display = 'block'; // Tampilkan tombol start
+            stopScanBtn.style.display = 'none'; // Sembunyikan tombol stop
+            const videoElement = qrReaderDiv.querySelector('video');
+            if (videoElement) { // Sembunyikan video kamera
+                videoElement.style.display = 'none';
+            }
+            const placeholderText = qrReaderDiv.querySelector('.qr-placeholder-text');
+            if (placeholderText) placeholderText.style.display = 'block'; // Tampilkan placeholder
         }).catch((err) => {
-            console.error("Failed to stop scanning.", err);
+            console.error("Gagal menghentikan scan:", err);
+            qrReaderResults.innerText = 'Gagal menghentikan kamera.';
         });
+    } else {
+        qrReaderResults.innerText = 'Kamera tidak sedang berjalan.';
+        startScanBtn.style.display = 'block'; // Pastikan tombol start terlihat jika tidak berjalan
+        stopScanBtn.style.display = 'none';
     }
 }
 
+function resetGuruSectionState() {
+    // Reset tampilan awal bagian guru
+    stopQrScanner(); // Pastikan scanner mati
+    document.getElementById('scannedNama').innerText = '';
+    document.getElementById('scannedKelas').innerText = '';
+    document.getElementById('scannedJurusan').innerText = '';
+    qrReaderResults.innerText = 'Klik "Mulai Scan Kamera" untuk memindai.';
+    pelanggaranForm.style.display = 'none';
+    document.querySelectorAll('input[name="pelanggaran"]').forEach(checkbox => {
+        checkbox.checked = false;
+    });
+    currentScannedStudent = null;
+    startScanBtn.style.display = 'block';
+    stopScanBtn.style.display = 'none';
+    const placeholderText = qrReaderDiv.querySelector('.qr-placeholder-text');
+    if (placeholderText) placeholderText.style.display = 'block';
+    const videoElement = qrReaderDiv.querySelector('video');
+    if (videoElement) videoElement.style.display = 'none';
+}
+
+
 // --- FUNGSI MENYIMPAN DATA PELANGGARAN ---
-let pelanggaranData = JSON.parse(localStorage.getItem('pelanggaranData')) || []; // Load dari LocalStorage
+let pelanggaranData = JSON.parse(localStorage.getItem('pelanggaranData')) || [];
 
 function recordPelanggaran() {
     if (!currentScannedStudent) {
@@ -163,21 +233,21 @@ function recordPelanggaran() {
         nama: currentScannedStudent.nama,
         kelas: currentScannedStudent.kelas,
         jurusan: currentScannedStudent.jurusan,
-        pelanggaran: selectedPelanggaran.join(', '), // Gabungkan jadi satu string
-        waktu: new Date().toLocaleString() // Waktu saat ini
+        pelanggaran: selectedPelanggaran.join(', '),
+        waktu: new Date().toLocaleString('id-ID', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }) // Format waktu lebih spesifik
     };
 
     pelanggaranData.push(newRecord);
-    localStorage.setItem('pelanggaranData', JSON.stringify(pelanggaranData)); // Simpan ke LocalStorage
+    localStorage.setItem('pelanggaranData', JSON.stringify(pelanggaranData));
 
-    renderPelanggaranList(); // Perbarui tampilan daftar
-    resetPelanggaranForm(); // Reset form setelah simpan
+    renderPelanggaranList();
+    resetPelanggaranForm();
     alert('Pelanggaran berhasil dicatat!');
 }
 
 function renderPelanggaranList() {
     const tableBody = document.querySelector('#pelanggaran-list tbody');
-    tableBody.innerHTML = ''; // Bersihkan tabel
+    tableBody.innerHTML = '';
 
     const noDataMessage = document.getElementById('no-data-message');
     if (pelanggaranData.length === 0) {
@@ -200,13 +270,12 @@ function resetPelanggaranForm() {
     document.getElementById('scannedNama').innerText = '';
     document.getElementById('scannedKelas').innerText = '';
     document.getElementById('scannedJurusan').innerText = '';
-    document.getElementById('qr-reader-results').innerText = '';
-    document.getElementById('pelanggaran-form').style.display = 'none';
+    // Tidak reset qrReaderResults dan form-pelanggaran display, biarkan seperti di stopQrScanner
     document.querySelectorAll('input[name="pelanggaran"]:checked').forEach(checkbox => {
         checkbox.checked = false;
     });
     currentScannedStudent = null;
-    startQrScanner(); // Mulai lagi scanner untuk scan berikutnya
+    // Biarkan guru yang memulai scan lagi dengan tombol start
 }
 
 // --- FUNGSI EKSPOR KE SPREADSHEET (CSV) ---
@@ -219,13 +288,11 @@ function exportToSpreadsheet() {
     const headers = ["Nama", "Kelas", "Jurusan", "Pelanggaran", "Waktu"];
     const csvRows = [];
 
-    // Tambahkan header
-    csvRows.push(headers.map(h => `"${h}"`).join(',')); // Enclose headers in quotes too
+    csvRows.push(headers.map(h => `"${h}"`).join(','));
 
-    // Tambahkan data
     pelanggaranData.forEach(record => {
         const values = [
-            `"${record.nama.replace(/"/g, '""')}"`, // Handle double quotes by escaping them
+            `"${record.nama.replace(/"/g, '""')}"`,
             `"${record.kelas.replace(/"/g, '""')}"`,
             `"${record.jurusan.replace(/"/g, '""')}"`,
             `"${record.pelanggaran.replace(/"/g, '""')}"`,
@@ -245,9 +312,8 @@ function exportToSpreadsheet() {
     alert('Data berhasil diekspor ke file CSV!');
 }
 
-
 // --- INITIAL LOAD ---
 document.addEventListener('DOMContentLoaded', () => {
-    renderPelanggaranList(); // Muat data yang sudah ada saat halaman dimuat
-    showSection('siswa'); // Tampilkan bagian siswa secara default
+    renderPelanggaranList();
+    showSection('siswa'); // Tampilkan bagian siswa secara default saat pertama kali loading
 });
